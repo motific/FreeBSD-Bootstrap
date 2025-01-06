@@ -5,9 +5,17 @@
 # All rights reserved
 # 
 # https://github.com/motific/FreeBSD-Bootstrap
-# 
+#
+
 # Script to move to pkgbase, add a user, and default packages
-# 
+#
+# Installation instructions
+#
+#   mkdir motific
+#   fetch https://raw.githubusercontent.com/motific/FreeBSD-Bootstrap/refs/heads/main/bootstrap.sh -o motific/bootstrap.sh
+#   chmod +x motific/bootstrap.sh
+#   ./motific/bootstrap.sh
+#
 
 USER_NAME='james'
 ## todo: bsddialog option for user name
@@ -71,6 +79,8 @@ echo -e "\n# Restrict insecure key exchange, cipher, and MAC algorithms\nKexAlgo
 ## todo: create/import ssh public key [https://www.cyberciti.biz/faq/freebsd-setting-up-public-key-password-less-ssh-login/]
 ## todo: disable password access
 sysrc sshd_enable=YES
+
+fwget
 
 ## todo: download system update scripts
 ## todo: trigger post-reboot cron jobs
