@@ -7,7 +7,7 @@
 # https://github.com/motific/FreeBSD-Bootstrap
 #
 
-# Script to move to pkgbase, add a user, and default packages
+# Script to move to pkgbase, add a user, default packages, and reboot
 #
 # Installation instructions
 #
