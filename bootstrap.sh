@@ -17,6 +17,11 @@
 #   ./motific/bootstrap.sh
 #
 
+if [ "$(id -u)" -eq 0 ]; then
+  echo "Error: Script must run as root" >&2
+  exit 1
+fi
+
 USER_NAME='james'
 ## todo: bsddialog option for user name
 
