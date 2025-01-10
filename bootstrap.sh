@@ -11,10 +11,9 @@
 #
 # Installation instructions
 #
-#   mkdir motific
-#   fetch https://raw.githubusercontent.com/motific/FreeBSD-Bootstrap/refs/heads/main/bootstrap.sh -o motific/bootstrap.sh
-#   chmod +x motific/bootstrap.sh
-#   ./motific/bootstrap.sh
+#   fetch https://motific.com/freebsd/get-bootstrap.sh -o /tmp/get-bootstrap.sh
+#   chmod +x /tmp/get-bootstrap.sh
+#   /tmp/get-bootstrap.sh
 #
 
 if [ "$(id -u)" -eq 0 ]; then
@@ -23,7 +22,9 @@ if [ "$(id -u)" -eq 0 ]; then
 fi
 
 USER_NAME='james'
+SNAP_NAME='FreeBSD-14-RELEASE-'$(date '+%Y-%m-%d')
 ## todo: bsddialog option for user name
+## todo: arg for user name
 
 sysrc powerd_enable="YES"
 sysrc powerd_flags="-a hiadaptive -b adaptive"
@@ -32,6 +33,7 @@ service powerd start
 ## set up pkg repos for latest packages and pkgbase
 ## info: pkgbase installation [https://wiki.freebsd.org/PkgBase]
 ## info: reddit [https://www.reddit.com/r/freebsd/comments/1d08a6c/preparing_for_greater_support_of_pkgbase_for/]
+
 mkdir -p /usr/local/etc/pkg/repos/
 echo -e 'FreeBSD: {\n  enabled: no\n}' > /usr/local/etc/pkg/repos/FreeBSD.conf
 echo -e 'FreeBSD-base: {\n  url: "https://pkg.freebsd.org/${ABI}/base_weekly",\n  mirror_type: "srv",\n  signature_type: "fingerprints",\n  fingerprints: "/usr/share/keys/pkg",\n  enabled: yes\n}' > /usr/local/etc/pkg/repos/FreeBSD-base.conf
@@ -51,6 +53,10 @@ cp /etc/sysctl.conf.pkgsave /etc/sysctl.conf
 ## after installing pkgbase you need to remake the password database
 pwd_mkdb -p /etc/master.passwd
 
+##todo: harden passwords - switch to blowfish
+sed -i -e 's/sha512/blowfish/g' /etc/login.conf
+cap_mkdb /etc/login.conf
+
 ## clean up pkgbase installation
 find / -name \*.pkgsave -delete
 rm /boot/kernel/linker.hints
@@ -63,7 +69,7 @@ pw usermod -n $USER_NAME -h 0
 pw groupmod -n wheel -m $USER_NAME
 
 ## default packages
-pkg install --yes doas sshd tmux
+pkg install --yes doas sshd tmux hw-probe
 
 ## package: doas
 echo -e 'permit :wheel\npermit nopass :wheel cmd shutdown\npermit nopass :wheel cmd pkg\n' > /usr/local/etc/doas.conf
@@ -85,7 +91,13 @@ echo -e "\n# Restrict insecure key exchange, cipher, and MAC algorithms\nKexAlgo
 ## todo: disable password access
 sysrc sshd_enable=YES
 
+## update firmware/microcode
 fwget
+
+## hardware probe upload
+hw-probe -all -upload
+pkg remove hw-probe --yes
+pkg autoremove --yes
 
 ## todo: download system update scripts
 ## todo: trigger post-reboot cron jobs
